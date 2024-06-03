@@ -1,0 +1,34 @@
+﻿[
+  {
+    "textId": 0, // id (0 dan başlar ve 1 eklenerek devam eder)
+    "textIndex": [ -1 ], // Yazılacak text ui sinin dizi indexi
+    "sceneIndex": [ 0, 1, 2 ], // Textin bulunduğu sceneIndex
+    "langDic": {
+      "tr": "Mekan",
+      "en": "Place",
+      "pt": "",
+      "es": "",
+      "pt_BR": "",
+      "de": "",
+      "fr": "",
+      "it": "",
+      "bg": "",
+      "cs": "",
+      "da": "",
+      "nl": "",
+      "fi": "",
+      "el": "",
+      "hu": "",
+      "ja": "",
+      "ko": "",
+      "no": "",
+      "pl": "",
+      "ro": "",
+      "ru": "",
+      "zh_CN": "",
+      "sv": "",
+      "zh_TW": "",
+      "uk": ""
+    }
+  }
+]

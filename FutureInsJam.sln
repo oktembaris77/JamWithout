@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tripolygon.UModelerX.PureCode.Hub.Editor", "Tripolygon.UModelerX.PureCode.Hub.Editor.csproj", "{DE0659B7-A7F3-AE14-D0A4-131658E679E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{54DE743F-00F4-5406-20FE-9AFB59722120}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{DEC2E214-E1FE-8788-09B8-47909929FCA0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE0659B7-A7F3-AE14-D0A4-131658E679E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE0659B7-A7F3-AE14-D0A4-131658E679E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE0659B7-A7F3-AE14-D0A4-131658E679E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE0659B7-A7F3-AE14-D0A4-131658E679E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54DE743F-00F4-5406-20FE-9AFB59722120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54DE743F-00F4-5406-20FE-9AFB59722120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54DE743F-00F4-5406-20FE-9AFB59722120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54DE743F-00F4-5406-20FE-9AFB59722120}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEC2E214-E1FE-8788-09B8-47909929FCA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEC2E214-E1FE-8788-09B8-47909929FCA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEC2E214-E1FE-8788-09B8-47909929FCA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEC2E214-E1FE-8788-09B8-47909929FCA0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
