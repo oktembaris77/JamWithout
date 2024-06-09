@@ -9,6 +9,7 @@ public class Managers : MonoBehaviour
     public SoundManager soundManager;
     public UIManager uiManager;
     public LanguageManager languageManager;
+    public GameplayManager gameplayManager;
     private void Awake()
     {
         instance = this;
@@ -17,6 +18,7 @@ public class Managers : MonoBehaviour
         TryGetComponent(out soundManager);
         TryGetComponent(out uiManager);
         TryGetComponent(out languageManager);
+        TryGetComponent(out gameplayManager);
     }
     // Start is called before the first frame update
     void Start()

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class Character : MonoBehaviour
 {
@@ -22,6 +23,9 @@ public class Character : MonoBehaviour
 
 	public float maxLookAngle = 90f; // Maksimum bakýþ açýsý
 
+	[SerializeField] Transform rayTarget;
+	[SerializeField] List<GameObject> rayHits;
+
 	private void Start()
 	{
 		// Karakter kontrolcü referansýný al
@@ -31,6 +35,7 @@ public class Character : MonoBehaviour
 	private void Update()
 	{
 		MoveUpdate();
+		RaycastUpdate();
 
 		Debug.Log(cam.transform.rotation.x);
 	}
@@ -40,7 +45,7 @@ public class Character : MonoBehaviour
 		float horizontalMove = Input.GetAxis("Horizontal");
 		float verticalMove = Input.GetAxis("Vertical");
 
-		if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
+		if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
 		{
 			Walk();
 		}
@@ -98,6 +103,75 @@ public class Character : MonoBehaviour
 
 		// Yeni dönme açýsýný uygula
 		cam.transform.localEulerAngles = new Vector3(newRotationX, cam.transform.localEulerAngles.y, cam.transform.localEulerAngles.z);
+	}
+	private void RaycastUpdate()
+	{
+		// A objesinin pozisyonu
+		Vector3 origin = cam.transform.position;
+
+		// B objesinin pozisyonu
+		Vector3 direction = (rayTarget.position - origin).normalized;
+
+		// RaycastHit bilgilerini tutmak için
+		RaycastHit hit;
+
+		// Raycast'i gerçekleþtir
+		if (Physics.Raycast(origin, direction, out hit))
+		{
+			Debug.Log("Hit: " + hit.collider.name);
+
+			// Çizgiyi sahnede görmek için
+			Debug.DrawRay(origin, direction * hit.distance, Color.red);
+
+			if (hit.collider.CompareTag("wall"))
+			{
+				AddRayHits(hit.collider.gameObject);
+			}
+			else RemoveRayHits();
+		}
+		else
+		{
+			// Hit olmazsa bile çizgiyi bir mesafeye kadar çiz
+			Debug.DrawRay(origin, direction * 100, Color.red);
+		}
+	}
+	private void AddRayHits(GameObject go)
+	{
+		bool check = false;
+		for (int i = 0; i < rayHits.Count; i++)
+		{
+			if (rayHits[i] == go)
+			{
+				check = true;
+			}
+			//else rayHits[i].GetComponent<MeshRenderer>().enabled = true;
+		}
+
+		if (check) return;
+
+		go.GetComponent<MeshRenderer>().enabled = false;
+		rayHits.Add(go);
+		//By hariç hepsini listeden sil
+		RemoveRayHits(go);
+	}
+	private void RemoveRayHits()
+	{
+		for (int i = 0; i < rayHits.Count; i++)
+		{
+			rayHits[i].GetComponent<MeshRenderer>().enabled = true;
+			rayHits.RemoveAt(i);
+		}
+	}
+	private void RemoveRayHits(GameObject go)
+	{
+		for (int i = 0; i < rayHits.Count; i++)
+		{
+			if (rayHits[i] != go)
+			{
+				rayHits[i].GetComponent<MeshRenderer>().enabled = true;
+				rayHits.RemoveAt(i);
+			}
+		}
 	}
 	public void AllFalse()
 	{

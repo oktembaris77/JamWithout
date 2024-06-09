@@ -74,6 +74,7 @@
     <Compile Include="Assets\Game\Scripts\Managers\Managers.cs" />
     <Compile Include="Assets\Perg Inventory System\Slots.cs" />
     <Compile Include="Assets\Game\Scripts\Managers\SoundManager.cs" />
+    <Compile Include="Assets\Game\Scripts\Managers\GameplayManager.cs" />
     <Compile Include="Assets\Game\Scripts\Managers\MainMenuManager.cs" />
     <Compile Include="Assets\Perg Inventory System\Classes\PanelCreator.cs" />
     <Compile Include="Assets\Game\Scripts\Managers\LanguageManager.cs" />
