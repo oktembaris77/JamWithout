@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.Image;
 
 public class Character : MonoBehaviour
 {
 	// Hýz ve zýplama gücü parametreleri
 	[SerializeField] Animator anim;
-	public float moveSpeed = 5f;
+	public float moveSpeed = 3f;
+	public float normalMoveSpeed = 3f;
+	public float runMoveSpeed = 5f;
 	public float jumpForce = 5f;
 	public float mouseXSpeed = 5f;
 	public float mouseYSpeed = 5f;
@@ -26,18 +29,131 @@ public class Character : MonoBehaviour
 	[SerializeField] Transform rayTarget;
 	[SerializeField] List<GameObject> rayHits;
 
+	[SerializeField] float rayMidDis = 5;
+
+	[SerializeField] float weaponSpineTime = 0.0f;
+
+	[SerializeField] int attackModeId = 0;
+	[SerializeField] int selectedWeapon = 0; //0 spear, 1 bow
+
+	//Weapons
+	[SerializeField] GameObject spearSpine;
+	[SerializeField] GameObject spearHand;
+
+	[SerializeField] GameObject bowSpine;
+	[SerializeField] GameObject bowHand;
+
 	private void Start()
 	{
+		StartCoroutine(WeaponSpineControl());
+
 		// Karakter kontrolcü referansýný al
 		controller = GetComponent<CharacterController>();
+
+		Cursor.lockState = CursorLockMode.Locked;
+		Cursor.visible = false;
 	}
 
 	private void Update()
 	{
 		MoveUpdate();
 		RaycastUpdate();
+		RaycastMidUpdate();
+		InputUpdate();
 
 		Debug.Log(cam.transform.rotation.x);
+	}
+	IEnumerator AttackMode(int attackModeId)
+	{
+		//TODO: Sýrttan spear alma animasyonu
+
+		SpineWeapon();
+		yield return new WaitForSeconds(0.5f);
+		WeaponActivity(attackModeId);
+		yield return new WaitForSeconds(0.5f);
+	}
+	IEnumerator WeaponSpineControl()
+	{
+		while(true)
+		{
+			if(attackModeId == 1)
+			{
+				weaponSpineTime += Time.deltaTime;
+
+				if (weaponSpineTime > 20.0f)
+				{
+					StartCoroutine(AttackMode(0));
+					StartCoroutine(AttackMode(2));
+					attackModeId = 0;
+					weaponSpineTime = 0.0f;
+				}
+			}
+			
+
+			yield return null;
+		}
+	}
+	private void AllFalseWeaponActivity()
+	{
+		spearSpine.SetActive(false);
+		spearHand.SetActive(false);
+		bowSpine.SetActive(false);
+		bowHand.SetActive(false);
+	}
+	/// <summary>
+	/// 0, spearSpine
+	/// 1, spearHand
+	/// </summary>
+	/// <param name="weapon"></param>
+	public void WeaponActivity(int weapon = -1)
+	{
+		AllFalseWeaponActivity();
+
+		if (weapon != -1)
+		{
+			switch (weapon)
+			{
+				case 0:
+					spearSpine.SetActive(true);
+					spearHand.SetActive(false);
+					break;
+				case 1:
+					spearHand.SetActive(true);
+					spearSpine.SetActive(false);
+					bowSpine.SetActive(true);
+					break;
+				case 2:
+					bowSpine.SetActive(true);
+					bowHand.SetActive(false);
+					break;
+				case 3:
+					bowHand.SetActive(true);
+					bowSpine.SetActive(false);
+					spearSpine.SetActive(true);
+					break;
+			}
+		}
+	
+	}
+	private void InputUpdate()
+	{
+		if(Input.GetMouseButtonDown(0))
+		{
+			if(selectedWeapon == 0)
+			{
+				StartCoroutine(AttackMode(1));
+				attackModeId = 1;
+				weaponSpineTime = 0;
+				Attack();
+			}
+			else if (selectedWeapon == 1)
+			{
+				StartCoroutine(AttackMode(3));
+				attackModeId = 1;
+				weaponSpineTime = 0;
+				BowAttack();
+			}
+		}
 	}
 	private void MoveUpdate()
 	{
@@ -51,7 +167,19 @@ public class Character : MonoBehaviour
 		}
 		else
 		{
+			anim.speed = 1;
 			AllFalse();
+		}
+
+		if (Input.GetKey(KeyCode.LeftShift))
+		{
+			moveSpeed = runMoveSpeed;
+			anim.speed = 1.3f;
+		}
+		else
+		{
+			moveSpeed = normalMoveSpeed;
+			anim.speed = 1;
 		}
 
 		// Check if the character is grounded
@@ -118,8 +246,6 @@ public class Character : MonoBehaviour
 		// Raycast'i gerçekleþtir
 		if (Physics.Raycast(origin, direction, out hit))
 		{
-			Debug.Log("Hit: " + hit.collider.name);
-
 			// Çizgiyi sahnede görmek için
 			Debug.DrawRay(origin, direction * hit.distance, Color.red);
 
@@ -133,6 +259,20 @@ public class Character : MonoBehaviour
 		{
 			// Hit olmazsa bile çizgiyi bir mesafeye kadar çiz
 			Debug.DrawRay(origin, direction * 100, Color.red);
+		}
+	}
+	private void RaycastMidUpdate()
+	{
+		Ray ray = cam.GetComponent<Camera>().ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+
+		RaycastHit hit; // Iþýnýmýzýn bir þeye çarptýðýný kontrol eden deðiþken
+
+		// 100 birim boyunca ýþýnýmýzý gönderiyoruz.
+		if (Physics.Raycast(ray, out hit, rayMidDis))
+		{
+			// Eðer ýþýn bir þeye çarparsa, bu þeyi konsola yazdýr.
+			Debug.Log("Iþýn bir þeye çarptý mid: " + hit.collider.gameObject.tag);
+			Debug.DrawRay(cam.transform.position, hit.point);
 		}
 	}
 	private void AddRayHits(GameObject go)
@@ -180,5 +320,17 @@ public class Character : MonoBehaviour
 	public void Walk()
 	{
 		anim.SetBool("walk", true);
+	}
+	public void SpineWeapon()
+	{
+		anim.SetBool("spineWeapon", true);
+	}
+	public void Attack()
+	{
+		anim.SetTrigger("attack");
+	}
+	public void BowAttack()
+	{
+		anim.SetTrigger("bowAttack");
 	}
 }
