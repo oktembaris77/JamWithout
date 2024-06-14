@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
@@ -15,9 +16,15 @@ public class Enemy : MonoBehaviour
 
 	[SerializeField] int attackModeId = 0;
 
+	public float health = 100.0f;
+	[SerializeField] Slider healthBar;
+	[SerializeField] GameObject canvas;
+
 	//Weapons
 	[SerializeField] GameObject spearSpine;
 	[SerializeField] GameObject spearHand;
+
+	[SerializeField] AudioSource audioSource;
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
     {
@@ -38,6 +45,8 @@ public class Enemy : MonoBehaviour
 			if (attackModeId == 1)
 				StartCoroutine(AttackMode(0));
 		}
+
+		canvas.transform.LookAt(Managers.instance.gameplayManager.playerCam.transform.position);
 	}
 	public void SetAttackActivity(bool activity)
 	{
@@ -129,12 +138,13 @@ public class Enemy : MonoBehaviour
 			if (hit.collider.CompareTag("Player") && IsAttackDistance())
 			{
 				nav.SetDestination(transform.position);
+				transform.LookAt(Managers.instance.gameplayManager.player.transform.position, new Vector3(0,1,0));
 				Attack();
 			}
 			else if (hit.collider.CompareTag("Player") && IsFollowDistance())
 			{
 				nav.SetDestination(Managers.instance.gameplayManager.player.transform.position);
-
+				
 				if (attackModeId == 0)
 					StartCoroutine(AttackMode(1));
 			}
@@ -144,6 +154,16 @@ public class Enemy : MonoBehaviour
 			// Hit olmazsa bile çizgiyi bir mesafeye kadar çiz
 			Debug.DrawRay(origin, direction * 100, Color.red);
 		}
+	}
+	private void GetDamage(float damage)
+	{
+		float newHealth = health - Random.Range(damage * 0.8f, damage * 1.1f);
+		SetHealth(newHealth);
+	}
+	private void SetHealth(float newHealth)
+	{
+		health = newHealth;
+		healthBar.value = health;
 	}
 	IEnumerator AttackMode(int attackModeId)
 	{
@@ -170,5 +190,26 @@ public class Enemy : MonoBehaviour
 	public void Attack()
 	{
 		anim.SetTrigger("attack");
+	}
+	public void Hit()
+	{
+		anim.SetTrigger("hit");
+	}
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.CompareTag("spearHit"))
+		{
+			Hit();
+			GetDamage(20);
+			Managers.instance.soundManager.PlayOneShotSound(Random.Range(2, 5), audioSource, false, true);
+			other.enabled = false;
+			StartCoroutine(SpearCollider(other));
+		}
+	}
+	IEnumerator SpearCollider(Collider collider)
+	{
+		yield return new WaitForSeconds(1);
+		collider.enabled = true;
+		yield return null;
 	}
 }

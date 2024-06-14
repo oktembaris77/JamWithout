@@ -16,16 +16,19 @@ public class SoundManager : MonoBehaviour
     public AudioSource effectAus6;
 
     public AudioClip[] clips;
+	public AudioClip[] footWalkClips;
+	public AudioClip[] footRunClips;
 
-    public int lastIndex = -1;
+	public int lastIndex = -1;
 
     public Slider audioVolSlide;
 
     public int currentBSindex = 0;
     public AudioSource[] backgroundSound;
     public AudioSource generalAudioSource;
-    // Start is called before the first frame update
-    void Start()
+
+	// Start is called before the first frame update
+	void Start()
     {
         if (PlayerPrefs.GetInt("setsound") == 0)
         {
@@ -104,5 +107,37 @@ public class SoundManager : MonoBehaviour
 
             backgroundSound[index].Play();
         }
+    }
+	public void PlayOneShotFootSound(int clipIndex, AudioSource audioSource, bool isNoPlaying = false, bool stopPlaying = false, AudioClip[] clipArray = null)
+	{
+
+		if (isNoPlaying && !audioSource.isPlaying)
+		{
+			audioSource.PlayOneShot(clipArray[clipIndex]);
+		}
+		else if (stopPlaying)
+		{
+			audioSource.Stop();
+			audioSource.PlayOneShot(clipArray[clipIndex]);
+		}
+	}
+    public void RandomWalking(int floor = 0, bool run = false)
+    {
+        AudioClip[] clipArray = new AudioClip[0];
+        if (floor == 0)
+        {
+            if (run) clipArray = footRunClips;
+            else clipArray = footWalkClips;
+        }
+
+
+        int rndIndex = Random.Range(0, clipArray.Length);
+        if (rndIndex == lastIndex)
+        {
+            if (rndIndex == clipArray.Length - 1) rndIndex--;
+            if (rndIndex == 0) rndIndex++;
+        }
+        lastIndex = rndIndex;
+        PlayOneShotFootSound(rndIndex, generalAudioSource, true, false, clipArray);
     }
 }

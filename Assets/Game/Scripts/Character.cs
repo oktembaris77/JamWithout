@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.Image;
 
@@ -14,6 +15,8 @@ public class Character : MonoBehaviour
 	public float jumpForce = 5f;
 	public float mouseXSpeed = 5f;
 	public float mouseYSpeed = 5f;
+
+	public float health = 100.0f;
 
 
 	// Yer çekimi ve karakter kontrolcü referanslarý
@@ -34,7 +37,7 @@ public class Character : MonoBehaviour
 	[SerializeField] float weaponSpineTime = 0.0f;
 
 	[SerializeField] int attackModeId = 0;
-	[SerializeField] int selectedWeapon = 0; //0 spear, 1 bow
+	[SerializeField] int selectedWeapon = -1; //0 spear, 1 bow
 
 	//Weapons
 	[SerializeField] GameObject spearSpine;
@@ -42,6 +45,8 @@ public class Character : MonoBehaviour
 
 	[SerializeField] GameObject bowSpine;
 	[SerializeField] GameObject bowHand;
+
+	[SerializeField] AudioSource audioSource;
 
 	private void Start()
 	{
@@ -52,6 +57,11 @@ public class Character : MonoBehaviour
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
+
+		if(PlayerPrefs.GetFloat("mouseSen") == 0) PlayerPrefs.SetFloat("mouseSen", 130);
+
+		mouseXSpeed = PlayerPrefs.GetFloat("mouseSen");
+		mouseYSpeed = PlayerPrefs.GetFloat("mouseSen");
 	}
 
 	private void Update()
@@ -116,6 +126,7 @@ public class Character : MonoBehaviour
 				case 0:
 					spearSpine.SetActive(true);
 					spearHand.SetActive(false);
+					bowSpine.SetActive(true);
 					break;
 				case 1:
 					spearHand.SetActive(true);
@@ -125,6 +136,7 @@ public class Character : MonoBehaviour
 				case 2:
 					bowSpine.SetActive(true);
 					bowHand.SetActive(false);
+					spearSpine.SetActive(true);
 					break;
 				case 3:
 					bowHand.SetActive(true);
@@ -155,6 +167,16 @@ public class Character : MonoBehaviour
 			}
 		}
 	}
+	private void GetDamage(float damage)
+	{
+		float newHealth = health - Random.Range(damage * 0.8f, damage * 1.2f);
+		SetHealth(newHealth);
+	}
+	private void SetHealth(float newHealth)
+	{
+		health = newHealth;
+		Managers.instance.uiManager.playerHealthBar.value = health;
+	}
 	private void MoveUpdate()
 	{
 		// Yatay ve dikey hareket vektörleri
@@ -164,6 +186,15 @@ public class Character : MonoBehaviour
 		if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
 		{
 			Walk();
+
+			if (Input.GetKey(KeyCode.LeftShift))
+			{
+				Managers.instance.soundManager.RandomWalking(0, true);
+			}
+			else
+			{
+				Managers.instance.soundManager.RandomWalking();
+			}
 		}
 		else
 		{
@@ -332,5 +363,26 @@ public class Character : MonoBehaviour
 	public void BowAttack()
 	{
 		anim.SetTrigger("bowAttack");
+	}
+	public void Hit()
+	{
+		anim.SetTrigger("hit");
+	}
+	private void OnTriggerEnter(Collider other)
+	{
+		if(other.gameObject.CompareTag("spearHit"))
+		{
+			Hit();
+			GetDamage(10);
+			Managers.instance.soundManager.PlayOneShotSound(Random.Range(2, 5), audioSource, false, true);
+			other.enabled = false;
+			StartCoroutine(SpearCollider(other));
+		}
+	}
+	IEnumerator SpearCollider(Collider collider)
+	{
+		yield return new WaitForSeconds(1);
+		collider.enabled = true;
+		yield return null;
 	}
 }
