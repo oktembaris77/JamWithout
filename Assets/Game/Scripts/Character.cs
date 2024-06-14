@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.Image;
 
@@ -17,6 +18,10 @@ public class Character : MonoBehaviour
 	public float mouseYSpeed = 5f;
 
 	public float health = 100.0f;
+
+	[SerializeField] bool die = false;
+
+	[SerializeField] Transform arrowSp;
 
 
 	// Yer çekimi ve karakter kontrolcü referanslarý
@@ -48,6 +53,13 @@ public class Character : MonoBehaviour
 
 	[SerializeField] AudioSource audioSource;
 
+	[SerializeField] GameObject spearCollider;
+
+	RaycastHit infHit; // Iþýnýmýzýn bir þeye çarptýðýný kontrol eden deðiþken
+
+
+	
+
 	private void Start()
 	{
 		StartCoroutine(WeaponSpineControl());
@@ -66,9 +78,24 @@ public class Character : MonoBehaviour
 
 	private void Update()
 	{
+		if (die) return;
+
+		if (Input.GetKeyDown(KeyCode.Alpha1))//spear
+		{
+			selectedWeapon = 0;
+			Attack();
+
+		}
+		if (Input.GetKeyDown(KeyCode.Alpha2)) //bow
+		{
+			selectedWeapon = 1;
+			Attack();
+		}
+
 		MoveUpdate();
 		RaycastUpdate();
 		RaycastMidUpdate();
+		RaycastInfinityUpdate();
 		InputUpdate();
 
 		Debug.Log(cam.transform.rotation.x);
@@ -164,6 +191,11 @@ public class Character : MonoBehaviour
 				attackModeId = 1;
 				weaponSpineTime = 0;
 				BowAttack();
+
+				if(infHit.collider != null && !infHit.collider.CompareTag("Player"))
+				{
+					StartCoroutine(BowAttackIE());
+				}
 			}
 		}
 	}
@@ -176,6 +208,21 @@ public class Character : MonoBehaviour
 	{
 		health = newHealth;
 		Managers.instance.uiManager.playerHealthBar.value = health;
+
+		if (health <= 0.0f)
+		{
+			die = true;
+			AllFalse();
+			Die();
+			Managers.instance.soundManager.PlayOneShotSound(11, Managers.instance.soundManager.generalAudioSource, false, true);
+			StartCoroutine(GoToMainMenu());
+		}
+	}
+	IEnumerator GoToMainMenu()
+	{
+		yield return new WaitForSeconds(3);
+
+		SceneManager.LoadScene(0);
 	}
 	private void MoveUpdate()
 	{
@@ -294,6 +341,8 @@ public class Character : MonoBehaviour
 	}
 	private void RaycastMidUpdate()
 	{
+	
+
 		Ray ray = cam.GetComponent<Camera>().ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
 
 		RaycastHit hit; // Iþýnýmýzýn bir þeye çarptýðýný kontrol eden deðiþken
@@ -304,6 +353,26 @@ public class Character : MonoBehaviour
 			// Eðer ýþýn bir þeye çarparsa, bu þeyi konsola yazdýr.
 			Debug.Log("Iþýn bir þeye çarptý mid: " + hit.collider.gameObject.tag);
 			Debug.DrawRay(cam.transform.position, hit.point);
+		}
+	}
+	private void RaycastInfinityUpdate()
+	{
+		// Öncelikle yok saymak istediðiniz katmanýn adýný belirleyin ve LayerMask olarak alýn.
+		int layerToIgnore = LayerMask.NameToLayer("InfRayMak");
+
+		// Katmaný yok sayarak tüm katmanlarý seçin.
+		int layerMask = 1 << layerToIgnore;
+
+		// Katmaný devre dýþý býrakýn.
+		layerMask = ~layerMask;
+
+		Ray ray = cam.GetComponent<Camera>().ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+
+
+		// 100 birim boyunca ýþýnýmýzý gönderiyoruz.
+		if (Physics.Raycast(ray, out infHit, Mathf.Infinity, layerMask))
+		{
+			Debug.DrawRay(cam.transform.position, infHit.point);
 		}
 	}
 	private void AddRayHits(GameObject go)
@@ -368,15 +437,33 @@ public class Character : MonoBehaviour
 	{
 		anim.SetTrigger("hit");
 	}
+	public void Die()
+	{
+		anim.SetTrigger("die");
+	}
 	private void OnTriggerEnter(Collider other)
 	{
-		if(other.gameObject.CompareTag("spearHit"))
+		if (die) return;
+
+		if (other.gameObject.CompareTag("spearHit"))
 		{
+			if(other.gameObject != spearCollider)
+
 			Hit();
-			GetDamage(10);
+			GetDamage(2);
 			Managers.instance.soundManager.PlayOneShotSound(Random.Range(2, 5), audioSource, false, true);
 			other.enabled = false;
 			StartCoroutine(SpearCollider(other));
+		}
+
+		if(other.gameObject.CompareTag("trap"))
+		{
+			GetDamage(10);
+		}
+
+		if (other.gameObject.CompareTag("end"))
+		{
+			SceneManager.LoadScene(0);
 		}
 	}
 	IEnumerator SpearCollider(Collider collider)
@@ -384,5 +471,13 @@ public class Character : MonoBehaviour
 		yield return new WaitForSeconds(1);
 		collider.enabled = true;
 		yield return null;
+	}
+	IEnumerator BowAttackIE()
+	{
+		
+
+		yield return new WaitForSeconds(0.7f);
+		GameObject arrow = Instantiate(Managers.instance.prefabManager.prefabs[0], arrowSp.transform.position, Quaternion.identity);
+		arrow.GetComponent<ArrowForce>().target = infHit.point;
 	}
 }

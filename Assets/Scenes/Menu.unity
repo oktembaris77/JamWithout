@@ -2839,6 +2839,7 @@ MonoBehaviour:
   uiManager: {fileID: 0}
   languageManager: {fileID: 0}
   gameplayManager: {fileID: 0}
+  prefabManager: {fileID: 0}
 --- !u!4 &1289701258
 Transform:
   m_ObjectHideFlags: 0
@@ -2875,6 +2876,8 @@ MonoBehaviour:
   effectAus6: {fileID: 0}
   clips:
   - {fileID: 8300000, guid: 9bd834c1f65c5ff4a861c720c71f7870, type: 3}
+  footWalkClips: []
+  footRunClips: []
   lastIndex: -1
   audioVolSlide: {fileID: 499601211}
   currentBSindex: 0
@@ -3467,8 +3470,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: ed27035d19afc1f44a5c6dff609a55da, type: 3}
-  m_Resource: {fileID: 8300000, guid: ed27035d19afc1f44a5c6dff609a55da, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 9a79167153bbf5044bf2c0f81e7b20dc, type: 3}
+  m_Resource: {fileID: 8300000, guid: 9a79167153bbf5044bf2c0f81e7b20dc, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -3774,9 +3777,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<color=red>Programmer</color>\nBar\u0131\u015F \xD6ktem\n\n<color=red>2D
-    Graphics</color>\nbeta.pixelvibe.com\n\n<color=red>Background Music</color>\nby
-    Eric Matyas\r\nwww.soundimage.org"
+  m_text: "<color=red>Programmer</color>\nBar\u0131\u015F \xD6ktem\n\n<color=red>3D
+    Graphics</color>\n3D Modeler\n\n<color=red>Background Music</color>\nby Eric
+    Matyas\r\nwww.soundimage.org"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}

@@ -9,12 +9,14 @@ public class Enemy : MonoBehaviour
     public Animator anim;
     public NavMeshAgent nav;
 
-	[SerializeField] bool attackActivity = false;
+	public bool attackActivity = false;
 
-	[SerializeField] float followDistance = 10.0f;
+	[SerializeField] float followDistance = 30.0f;
 	[SerializeField] float attackDistance = 2.0f;
 
 	[SerializeField] int attackModeId = 0;
+
+	[SerializeField] bool die = false;
 
 	public float health = 100.0f;
 	[SerializeField] Slider healthBar;
@@ -34,6 +36,8 @@ public class Enemy : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
+		if (die) return;
+
 		AnimUpdate();
 
 		if (attackActivity)
@@ -155,7 +159,7 @@ public class Enemy : MonoBehaviour
 			Debug.DrawRay(origin, direction * 100, Color.red);
 		}
 	}
-	private void GetDamage(float damage)
+	public void GetDamage(float damage)
 	{
 		float newHealth = health - Random.Range(damage * 0.8f, damage * 1.1f);
 		SetHealth(newHealth);
@@ -164,6 +168,17 @@ public class Enemy : MonoBehaviour
 	{
 		health = newHealth;
 		healthBar.value = health;
+
+		if(health <= 0.0f)
+		{
+			die = true;
+			nav.enabled = false;
+			AllFalse();
+			Die();
+			Managers.instance.soundManager.PlayOneShotSound(11, audioSource, false, true);
+			spearHand.GetComponent<BoxCollider>().enabled = false;
+			Destroy(gameObject, 10);
+		}
 	}
 	IEnumerator AttackMode(int attackModeId)
 	{
@@ -195,15 +210,34 @@ public class Enemy : MonoBehaviour
 	{
 		anim.SetTrigger("hit");
 	}
+	public void Die()
+	{
+		anim.SetTrigger("die");
+	}
 	private void OnTriggerEnter(Collider other)
 	{
-		if (other.gameObject.CompareTag("spearHit"))
+		if (die) return;
+
+		if (other.gameObject.CompareTag("spearHitPlayer"))
 		{
+			attackActivity = true;
 			Hit();
-			GetDamage(20);
+			GetDamage(80);
 			Managers.instance.soundManager.PlayOneShotSound(Random.Range(2, 5), audioSource, false, true);
+			Managers.instance.soundManager.PlayOneShotSound(Random.Range(7, 11), Managers.instance.soundManager.effectAus2, false, true);
 			other.enabled = false;
 			StartCoroutine(SpearCollider(other));
+		}
+
+		if(other.gameObject.CompareTag("arrow"))
+		{
+			Managers.instance.soundManager.PlayOneShotSound(6, Managers.instance.soundManager.effectAus1, false, true);
+			Managers.instance.soundManager.PlayOneShotSound(Random.Range(7, 11), Managers.instance.soundManager.effectAus2, false, true);
+		}
+
+		if (other.gameObject.CompareTag("trap"))
+		{
+			//GetDamage(10);
 		}
 	}
 	IEnumerator SpearCollider(Collider collider)

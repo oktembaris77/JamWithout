@@ -8,6 +8,12 @@ TagManager:
   - lantern
   - door
   - spearHit
+  - arrow
+  - enemy
+  - bow
+  - spearHitPlayer
+  - trap
+  - end
   layers:
   - Default
   - TransparentFX
@@ -17,8 +23,8 @@ TagManager:
   - UI
   - PostProcess
   - Light
-  - 
-  - 
+  - Player
+  - InfRayMak
   - 
   - 
   - 
